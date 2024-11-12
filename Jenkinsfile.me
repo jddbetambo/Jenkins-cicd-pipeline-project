@@ -1,0 +1,84 @@
+def COLOR_MAP = [
+    'SUCCESS': 'good',
+    'FAILURE': 'danger',
+    ]
+pipeline {
+    agent any
+    
+    tools {
+        maven 'localMaven'
+        jdk 'localJdk'
+    }
+
+    stages {
+        // Welcome Stage
+        stage('Stage 1: Greeting') {
+            steps {
+                echo '################################################'
+                echo 'USING MAVEN FOR BUILDING'
+                echo '################################################'
+            }
+        }
+        
+        stage('Git checkout') {
+            steps {
+                echo 'Git checkout'
+                git branch: 'main', credentialsId: 'github_login', url: 'https://github.com/jddbetambo/Jenkins-cicd-pipeline-project.git'
+            }
+        }
+        
+        stage('Build with Maven') {
+            steps {
+                echo 'Build with Maven'
+                sh 'mvn clean package'
+            }
+            post { 
+                success { 
+                    archiveArtifacts artifacts: '**/*.war', followSymlinks: false
+                }
+            }
+        }
+        
+        // Maven testing step
+        stage('Unit Test') {
+            steps {
+                 echo 'Unit test'
+                sh 'mvn test'
+            }
+        }
+        
+        // Verify but skip the test step
+        stage('Integration Test') {
+            steps {
+                 echo 'Maven verify'
+                sh 'mvn verify -DskipUnitTests'
+            }
+        }
+        
+        // Checking code for the standard with checkstyle
+        stage('Checkstyle Code Analysis') {
+            steps {
+                sh 'mvn checkstyle:checkstyle'
+            }
+            post {
+                success {
+                    slackSend channel: '#jdd-jenkins-cicd', color: COLOR_MAP[currentBuild.currentResult], message: "Notifications (JDD): Successful Checkstyle Code Analysis. \n Server: ${env.BUILD_URL} \n Job Name: ${env.JOB_NAME} \n Build Number: ${env.BUILD_NUMBER} \n Result: ${currentBuild.currentResult}", teamDomain: 'jddtechinc', tokenCredentialId: 'slack-login'
+                }
+                failure {
+                    slackSend channel: '#jdd-jenkins-cicd', color: COLOR_MAP[currentBuild.currentResult], message: "Notifications (JDD): Failed Checkstyle Code Analysis. \n Server: ${env.BUILD_URL} \n Job Name: ${env.JOB_NAME} \n Build Number: ${env.BUILD_NUMBER} \n Result: ${currentBuild.currentResult}", teamDomain: 'jddtechinc', tokenCredentialId: 'slack-login'
+                }
+            }
+        }  
+    }
+    post {
+        always {
+            mail bcc: 'jddbetambo@gmail.com', 
+            cc: 'testerjdd@gmail.com', 
+            from: 'jddmangan@gmail.com', 
+            replyTo: 'jddmangan@gmail.com', 
+            subject: 'Jenkins Build Result', 
+            to: 'awsjdd2@gmail.com',
+            body: "Jenkins Server: $JENKINS_URL \n Job Name: $JOB_NAME \n Build Number: $BUILD_ID \n Result: $currentBuild.currentResult" 
+        }
+    }
+}
