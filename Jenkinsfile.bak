@@ -14,6 +14,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
+        echo ' Cleaning packages '
         sh 'mvn clean package'
       }
       post {
@@ -25,16 +26,19 @@ pipeline {
     }
     stage('Unit Test'){
         steps {
+            echo ' now Testing '
             sh 'mvn test'
         }
     }
     stage('Integration Test'){
         steps {
+          echo ' Integration Test '
           sh 'mvn verify -DskipUnitTests'
         }
     }
     stage ('Checkstyle Code Analysis'){
         steps {
+            echo ' CheckStyle operations '
             sh 'mvn checkstyle:checkstyle'
         }
         post {
