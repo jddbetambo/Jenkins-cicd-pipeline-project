@@ -62,10 +62,10 @@ pipeline {
             }
             post {
                 success {
-                    slackSend channel: '#jdd-jenkins-cicd', color: COLOR_MAP[currentBuild.currentResult], message: "Notifications (JDD): Successful Checkstyle Code Analysis. \n Server: ${env.BUILD_URL} \n Job Name: ${env.JOB_NAME} \n Build Number: ${env.BUILD_NUMBER} \n Result: ${currentBuild.currentResult}", teamDomain: 'jddtechinc', tokenCredentialId: 'slack-login'
+                    slackSend channel: '#jdd-jenkins-cicd', color: COLOR_MAP[currentBuild.currentResult], message: "Notifications (JDD): Successful Checkstyle Code Analysis. \n Server: ${env.BUILD_URL} \n Workspace:${WORKSPACE} \n Job Name: ${env.JOB_NAME} \n Build Number: ${env.BUILD_NUMBER} \n Result: ${currentBuild.currentResult}", teamDomain: 'jddtechinc', tokenCredentialId: 'slack-login'
                 }
                 failure {
-                    slackSend channel: '#jdd-jenkins-cicd', color: COLOR_MAP[currentBuild.currentResult], message: "Notifications (JDD): Failed Checkstyle Code Analysis. \n Server: ${env.BUILD_URL} \n Job Name: ${env.JOB_NAME} \n Build Number: ${env.BUILD_NUMBER} \n Result: ${currentBuild.currentResult}", teamDomain: 'jddtechinc', tokenCredentialId: 'slack-login'
+                    slackSend channel: '#jdd-jenkins-cicd', color: COLOR_MAP[currentBuild.currentResult], message: "Notifications (JDD): Failed Checkstyle Code Analysis. \n Server: ${env.BUILD_URL} \n Workspace:${WORKSPACE} \n Job Name: ${env.JOB_NAME} \n Build Number: ${env.BUILD_NUMBER} \n Result: ${currentBuild.currentResult}", teamDomain: 'jddtechinc', tokenCredentialId: 'slack-login'
                 }
             }
         }  
@@ -73,12 +73,12 @@ pipeline {
     post {
         always {
             mail bcc: 'jddbetambo@gmail.com', 
-            cc: 'testerjdd@gmail.com', 
+            //cc: 'testerjdd@gmail.com', 
             from: 'jddmangan@gmail.com', 
-            replyTo: 'jddmangan@gmail.com', 
+            //replyTo: 'jddmangan@gmail.com', 
             subject: 'Jenkins Build Result', 
             to: 'awsjdd2@gmail.com',
-            body: "Jenkins Server: $JENKINS_URL \n Job Name: $JOB_NAME \n Build Number: $BUILD_ID \n Result: $currentBuild.currentResult" 
+            body: "Jenkins Server: $JENKINS_URL \n Workspace:${WORKSPACE} \n Job Name: $JOB_NAME \n Build Number: $BUILD_ID \n Result: $currentBuild.currentResult" 
         }
     }
 }
